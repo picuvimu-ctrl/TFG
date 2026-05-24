@@ -653,7 +653,6 @@ const RelationGraphInner = ({ initialPersonaId, onViewPersona }) => {
 
   const handleShowPathFinder = () => {
     setShowPathFinder(true);
-    setGraphMode('network');
     setShowExtendedNetwork(false);
     setSelectedPersona(null);
     setShowAllRelations(false);
@@ -742,7 +741,7 @@ const RelationGraphInner = ({ initialPersonaId, onViewPersona }) => {
           {/* Botón buscador de caminos */}
           <button
             onClick={handleShowPathFinder}
-            disabled={graphMode === 'tree'}
+            disabled={loading}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -781,7 +780,7 @@ const RelationGraphInner = ({ initialPersonaId, onViewPersona }) => {
         </p>
 
         {/* Buscador de caminos entre personas */}
-        {showPathFinder && graphMode !== 'tree' && (
+        {showPathFinder && (
           <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 mb-4">
             <h3 className="text-white font-semibold mb-3">Buscar conexión entre dos personas:</h3>
             <div className="flex gap-4 flex-wrap items-end">
