@@ -350,7 +350,7 @@ def to_accent_insensitive_regex(text: str) -> str:
 @retry_on_socket_error()
 def search_personas(filters: SearchFilters):
     try:
-        query = db.table("Persona").select("*")
+        query = db.table("Persona").select("*, AtributoPersona(*)")
         
         if filters.genero:
             query = query.eq("Genero", filters.genero)
@@ -417,7 +417,31 @@ def search_personas(filters: SearchFilters):
             if ids_validos is not None:
                 personas = [p for p in personas if int(p["id"]) in ids_validos]
 
-        return personas
+        processed = []
+        for p in personas:
+            try:
+                p_dict = dict(p)
+                atributos = p.get("AtributoPersona", [])
+                if not isinstance(atributos, list):
+                    atributos = []
+                
+                # Extraer fechas clave de los atributos (se mantienen para compatibilidad con el grafo)
+                p_dict["FechaNacimiento"] = None
+                p_dict["FechaDefuncion"] = None
+                
+                for a in atributos:
+                    nombre = (a.get("nombre_atributo") or "").lower()
+                    if nombre == "nacimiento":
+                        p_dict["FechaNacimiento"] = a.get("fecha_inicio")
+                    elif nombre in ["defunción", "defuncion", "fallecimiento"]:
+                        p_dict["FechaDefuncion"] = a.get("fecha_inicio")
+                
+                processed.append(p_dict)
+            except Exception as e:
+                logger.error("Error procesando persona %s: %s", p.get('id'), e)
+                processed.append(dict(p))
+
+        return processed
     except Exception as e:
         _raise(str(e))
 
